@@ -71,12 +71,14 @@ def get_latest_message(consumer, topic, timeframe):
     time_difference_cosmos = (current_time - message_cosmos_ts) / 60  # Diferença de tempo em minutos
 
     if args.debug:
+        print(f"------- Start proccessing topic: " + topic)
         print(f'Received {message_count} messages in the last {timeframe} seconds ({messages_per_second} messages/second)')
-        print(f"\n\nTimestamp Kafka: {message.timestamp()}")
-        print(f"Timestamp Cosmos: {message_cosmos_ts}\n\n")
+        print(f"Timestamp Kafka: {message.timestamp()}")
+        print(f"Timestamp Cosmos: {message_cosmos_ts}")
         print(f"Current Timestamp:{current_time}")
         print(f"Message received at {timestamp[1]} which is {time_difference_kafka} minutes ago")
         print(f"Message received at  {message_cosmos_ts} which is {time_difference_cosmos} minutes ago")
+        print(f"------- End proccessing topic: " + topic)
 
     consumer.close()
 
@@ -93,11 +95,9 @@ def split_topics(s):
     return s.split(',') if ',' in s else s.split()
 
 def process_topic(topic):
-    print(topic)
     consumer = create_consumer(args)
     result = get_latest_message(consumer, topic, args.timeframe)
     
-    print(topic)
     prom['cosmos_connector_age_cosmos_record'].labels(
         connector_topic=topic,
     ).set(result['time_difference_cosmos'])
