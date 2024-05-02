@@ -111,7 +111,7 @@ def process_topic(topic):
     ).set(result['messages_per_second'])
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Connect to Kafka and get the latest message from a topic.')
+    parser = argparse.ArgumentParser(description='Connect to Kafka topics written by CosmosDB and have how old the records are, along with message rate.')
     parser.add_argument('--hostname', required=True, help='The hostname of the Kafka server.')
     parser.add_argument('--port', required=True, help='The port of the Kafka server.')
     parser.add_argument('--username', required=True, help='The username for SASL/PLAIN authentication.')
@@ -125,9 +125,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     prom = {
-        'cosmos_connector_age_cosmos_record': Gauge('cosmos_connector_age_cosmos_record', 'Age of the latest record based on Cosmos timestamp (in minutes), AKA hold old is the record gotten from cosmos',
+        'cosmos_connector_age_cosmos_record': Gauge('cosmos_connector_age_cosmos_record', 'Age of the latest event, based on Cosmos timestamp (in minutes), AKA how old is the record gotten from cosmos',
             ['connector_topic']),
-        'cosmos_connector_age_kafka_record': Gauge('cosmos_connector_age_kafka_record', 'Age of the latest record based on Kafka timestamp (in minutes), AKA how many time since kafka got a new message',
+        'cosmos_connector_age_kafka_record': Gauge('cosmos_connector_age_kafka_record', 'Age of the latest event based on Kafka timestamp (in minutes), AKA how many time since kafka got a new message',
             ['connector_topic']),
         'cosmos_connector_message_rate': Gauge('cosmos_connector_message_rate', 'Amount of messages per second in Topic',
             ['connector_topic']),
