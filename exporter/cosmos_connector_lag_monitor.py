@@ -129,7 +129,7 @@ if __name__ == "__main__":
     if args.topic is not None:
         # User --topic
         topics = args.topic
-    elif args.topic is not None:
+    elif args.topics is not None:
         # User --topics
         topics = args.topics
 
