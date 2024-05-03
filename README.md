@@ -11,19 +11,22 @@ Prometheus exporter for `Kafka Topics` topics that are written by CosmosDB conne
 ## Configuration
 
 ```sh
-usage: cosmos_connector_lag_monitor.py [-h] --hostname HOSTNAME --port PORT --username USERNAME --password PASSWORD --topics TOPICS --timeframe TIMEFRAME
-                                       --port_prometheus PORT_PROMETHEUS --interval INTERVAL [--debug]
+usage: cosmos_connector_lag_monitor.py [-h] --hostname HOSTNAME --port PORT --username USERNAME --password PASSWORD --timeframe TIMEFRAME --port_prometheus PORT_PROMETHEUS --interval INTERVAL [--debug] (--topics TOPICS | --topic TOPIC)
 
 options:
-  --hostname HOSTNAME                   The hostname of the Kafka server.
-  --port PORT                           The port of the Kafka server.
-  --username USERNAME                   The username for SASL/PLAIN authentication.
-  --password PASSWORD                   The password for SASL/PLAIN authentication.
-  --topics TOPICS                       The names of the topics to get the latest message from.
-  --timeframe TIMEFRAME             The timeframe to get the messages from.
-  --port_prometheus PORT_PROMETHEUS     The port to expose the Prometheus metrics.
-  --interval INTERVAL                   The interval to update metrics
-  --debug                               Enable debug mode.
+  -h, --help            show this help message and exit
+  --hostname HOSTNAME   The hostname of the Kafka server.
+  --port PORT           The port of the Kafka server.
+  --username USERNAME   The username for SASL/PLAIN authentication.
+  --password PASSWORD   The password for SASL/PLAIN authentication.
+  --timeframe TIMEFRAME
+                        The timeframe to get the messages from.
+  --port_prometheus PORT_PROMETHEUS
+                        The port to expose the Prometheus metrics.
+  --interval INTERVAL   The interval to update metrics
+  --debug               Enable debug mode.
+  --topics TOPICS       The names of the topics to get the latest message from. (Comma separated, Cant be used multiple times)
+  --topic TOPIC         The name of the topic to get the latest message from. (Can be used multiple times)
 ```
 
 ## Usage
