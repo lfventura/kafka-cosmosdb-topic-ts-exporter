@@ -117,12 +117,13 @@ if __name__ == "__main__":
     parser.add_argument('--port', required=True, help='The port of the Kafka server.')
     parser.add_argument('--username', required=True, help='The username for SASL/PLAIN authentication.')
     parser.add_argument('--password', required=True, help='The password for SASL/PLAIN authentication.')
-    parser.add_argument('--topics', required=True, type=split_topics, help='The names of the topics to get the latest message from.')
     parser.add_argument('--timeframe', required=True, type=int, help='The timeframe to get the messages from.')
     parser.add_argument('--port_prometheus', required=True, type=int, help='The port to expose the Prometheus metrics.')
     parser.add_argument('--interval', required=True, type=int, help='The interval to update metrics')
     parser.add_argument('--debug', action='store_true', help='Enable debug mode.')
-
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('--topics', type=split_topics, help='The names of the topics to get the latest message from. (Comma separated, Cant be used multiple times)')
+    group.add_argument('--topic', action='append', help='The name of the topic to get the latest message from. (Can be used multiple times)')
     args = parser.parse_args()
 
     prom = {
