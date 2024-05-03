@@ -133,7 +133,6 @@ if __name__ == "__main__":
         # User --topics
         topics = args.topics
 
-    print(topics)
     prom = {
         'cosmos_connector_age_cosmos_record': Gauge('cosmos_connector_age_cosmos_record', 'Age of the latest event, based on Cosmos timestamp (in minutes), AKA how old is the record gotten from cosmos',
             ['connector_topic']),
