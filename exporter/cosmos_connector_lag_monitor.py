@@ -126,6 +126,14 @@ if __name__ == "__main__":
     group.add_argument('--topic', action='append', help='The name of the topic to get the latest message from. (Can be used multiple times)')
     args = parser.parse_args()
 
+    if args.topic is not None:
+        # User --topic
+        topics = args.topic
+    elif args.topic is not None:
+        # User --topics
+        topics = args.topics
+
+    print(topics)
     prom = {
         'cosmos_connector_age_cosmos_record': Gauge('cosmos_connector_age_cosmos_record', 'Age of the latest event, based on Cosmos timestamp (in minutes), AKA how old is the record gotten from cosmos',
             ['connector_topic']),
@@ -141,7 +149,7 @@ if __name__ == "__main__":
     try:
         while True:
             with ThreadPoolExecutor() as executor:
-                for topic in args.topics:
+                for topic in topics:
                     executor.submit(process_topic, topic)
                 
                 executor.shutdown(wait=True)
