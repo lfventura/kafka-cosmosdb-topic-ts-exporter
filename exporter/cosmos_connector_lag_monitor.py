@@ -26,7 +26,7 @@ def error_cb(err):
 def create_consumer(args):
     conf = {
         'bootstrap.servers': f"{args.hostname}:{args.port}",
-        'group.id': 'monitoring_cosmos',
+        'group.id': 'monitoring_cosmos2',
         'security.protocol': 'SASL_SSL',
         'sasl.mechanisms': 'PLAIN',
         'sasl.username': args.username,
@@ -46,30 +46,30 @@ def get_latest_message(consumer, topic, timeframe):
         message_count = 0
         start_time = time.time()
         last_valid_message = None
+        older_cosmos_timestamp = time.time() + 3600
 
         while True:
             message = consumer.poll(1.0)
-
-            # if message is None:
-            #     continue
-            # if message.error():
-            #     if message.error().code() == KafkaError._PARTITION_EOF:
-            #         continue
-            #     else:
-            #         raise KafkaException(message.error())
-            
+          
             if message is not None:
                 if message.error():
                     if message.error().code() == KafkaError._PARTITION_EOF:
                         continue
                     else:
                         raise KafkaException(message.error())               
+                # print(f"Topic: {topic}, Partition: {message.partition()}, Offset: {message.offset()}")
                 message_count += 1
-                last_valid_message = message
+
+                current_cosmos_timestamp = json.loads(message.value().decode('utf-8')).get('_ts')
+                if current_cosmos_timestamp < older_cosmos_timestamp:
+                    print(f"New older timestamp found: {current_cosmos_timestamp}") if args.debug else None
+                    older_cosmos_timestamp = current_cosmos_timestamp
+                    last_valid_message = message
 
             if time.time() - start_time > timeframe:
-                messages_per_second = round(message_count / (time.time() - start_time),2)
                 break
+
+        print(f"Total messages processed: {message_count} in {topic}") if args.debug else None
 
         if last_valid_message is not None:
             timestamp = last_valid_message.timestamp()
@@ -78,8 +78,9 @@ def get_latest_message(consumer, topic, timeframe):
             # Calcula a diferença de tempo em minutos
             current_time = int(time.time())  # Tempo atual em segundos
             message_kafka_ts = timestamp[1] / 1000  # Tempo da mensagem Kafka em segundos
-            time_difference_kafka = (current_time - message_kafka_ts) / 60  # Diferença de tempo em minutos
-            time_difference_cosmos = (current_time - message_cosmos_ts) / 60  # Diferença de tempo em minutos
+            time_difference_kafka = (time.time() - message_kafka_ts) / 60  # Diferença de tempo em minutos
+            time_difference_cosmos = (message_kafka_ts - message_cosmos_ts) / 60  # Diferença de tempo em minutos
+            time_difference_cosmos_old = (current_time - message_cosmos_ts) / 60  # Diferença de tempo em minutos
         else:
             current_time = int(time.time())
             timestamp = 0
@@ -87,16 +88,15 @@ def get_latest_message(consumer, topic, timeframe):
             message_cosmos_ts = 0
             time_difference_kafka = 0
             time_difference_cosmos = 0
-            messages_per_second = 0
 
         if args.debug:
             print(f"------- Start proccessing topic: " + topic)
-            print(f'Received {message_count} messages in the last {timeframe} seconds ({messages_per_second} messages/second)')
+            print(f'Received {message_count} messages in the last {timeframe} seconds')
             print(f"Timestamp Kafka: {timestamp}")
             print(f"Timestamp Cosmos: {message_cosmos_ts}")
             print(f"Current Timestamp:{current_time}")
             print(f"Message received at {message_kafka_ts} which is {time_difference_kafka} minutes ago")
-            print(f"Message received at  {message_cosmos_ts} which is {time_difference_cosmos} minutes ago")
+            print(f"Message received at  {message_cosmos_ts} which is {time_difference_cosmos} minutes ago.")   
             print(f"------- End proccessing topic: " + topic)
 
         consumer.close()
@@ -109,7 +109,6 @@ def get_latest_message(consumer, topic, timeframe):
         'message_time_cosmos': message_cosmos_ts,
         'time_difference_cosmos': time_difference_cosmos,
         'time_difference_kafka': time_difference_kafka,
-        'messages_per_second': messages_per_second,
     }
 
 def split_topics(s):
@@ -126,10 +125,6 @@ def process_topic(topic):
     prom['cosmos_connector_age_kafka_record'].labels(
         connector_topic=topic,
     ).set(result['time_difference_kafka'])
-
-    prom['cosmos_connector_message_rate'].labels(
-        connector_topic=topic,
-    ).set(result['messages_per_second'])
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Connect to Kafka topics written by CosmosDB and have how old the records are, along with message rate.')

@@ -6,7 +6,6 @@ Prometheus exporter for `Kafka Topics` topics that are written by CosmosDB conne
 
 - `cosmos_connector_age_cosmos_record` Age of the latest event, based on Cosmos timestamp (in minutes), AKA how old is the record gotten from cosmos
 - `cosmos_connector_age_kafka_record` Age of the latest event based on Kafka timestamp (in minutes), AKA how many time since kafka got a new message
-- `cosmos_connector_message_rate` How many messages/sec where gotten in the --timeframe flag
 
 ## Configuration
 
@@ -55,10 +54,6 @@ cosmos_connector_age_cosmos_record{connector_topic="<topic_name>"} xx.xx
 # TYPE cosmos_connector_age_kafka_record gauge
 cosmos_connector_age_kafka_record{connector_topic="<topic_name>"} xx.xx
 ...
-# HELP cosmos_connector_message_rate Amount of messages per second in Topic
-# TYPE cosmos_connector_message_rate gauge
-cosmos_connector_message_rate{connector_topic="<topic_name>"} xx.xx
-..
 ```
 
 ## Contribute
